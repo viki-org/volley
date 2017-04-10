@@ -16,6 +16,9 @@
 
 package com.android.volley.toolbox;
 
+import android.os.Build;
+import android.text.TextUtils;
+
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Request.Method;
@@ -36,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +54,7 @@ import javax.net.ssl.SSLSocketFactory;
 public class HurlStack implements HttpStack {
 
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
+    private static final String UTF8_CHARSET = "UTF-8";
 
     /**
      * An interface for transforming URLs before use.
@@ -64,9 +69,13 @@ public class HurlStack implements HttpStack {
 
     private final UrlRewriter mUrlRewriter;
     private final SSLSocketFactory mSslSocketFactory;
+    private String appVersion, connectionType;
 
-    public HurlStack() {
+    public HurlStack(String appVersion, String connectionType) {
         this(null);
+
+        this.appVersion = appVersion;
+        this.connectionType = connectionType;
     }
 
     /**
@@ -85,13 +94,24 @@ public class HurlStack implements HttpStack {
         mSslSocketFactory = sslSocketFactory;
     }
 
+    private Map<String,String> getVikiHeaders() {
+        Map<String, String> additionalHeaders = new HashMap<>();
+        additionalHeaders.put("X-Viki-app-ver", appVersion);
+        additionalHeaders.put("X-Viki-manufacturer", Build.MANUFACTURER);
+        additionalHeaders.put("X-Viki-device-model", Build.MODEL);
+        additionalHeaders.put("X-Viki-device-os-ver", Build.VERSION.RELEASE);
+        additionalHeaders.put("X-Viki-connection-type", connectionType);
+        return additionalHeaders;
+    }
+
     @Override
     public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
             throws IOException, AuthFailureError {
-        String url = request.getUrl();
+        String url = getUrlBaseOnMethod(request);
         HashMap<String, String> map = new HashMap<String, String>();
         map.putAll(request.getHeaders());
         map.putAll(additionalHeaders);
+        map.putAll(getVikiHeaders());
         if (mUrlRewriter != null) {
             String rewritten = mUrlRewriter.rewriteUrl(url);
             if (rewritten == null) {
@@ -126,6 +146,44 @@ public class HurlStack implements HttpStack {
             }
         }
         return response;
+    }
+
+    private String getUrlBaseOnMethod(Request<?> request) throws AuthFailureError, IOException{
+        String url = request.getUrl();
+        switch (request.getMethod()) {
+            case Method.DEPRECATED_GET_OR_POST:
+            case Method.GET:
+            case Method.DELETE:
+            case Method.PUT:
+            case Method.HEAD:
+                StringBuilder paramBuilder = new StringBuilder();
+                if (request.getParams() != null && !request.getParams().isEmpty()) {
+                    int count = 0;
+                    for (Map.Entry<String, String> parameter : request.getParams().entrySet()) {
+                        String key = parameter.getKey();
+                        String value = parameter.getValue();
+                        if (value == null){
+                            value = "null";
+                        }
+                        paramBuilder.append(URLEncoder.encode(key, UTF8_CHARSET));
+                        paramBuilder.append("=");
+                        paramBuilder.append(URLEncoder.encode(value, UTF8_CHARSET));
+                        if (count < request.getParams().size() - 1){
+                            paramBuilder.append("&");
+                        }
+                        count++;
+                    }
+                }
+                if (!TextUtils.isEmpty(paramBuilder.toString())){
+                    if (!url.contains("?")){
+                        url = url + "?" + paramBuilder.toString();
+                    }
+                    else{
+                        url = url + "&" + paramBuilder.toString();
+                    }
+                }
+        }
+        return url;
     }
 
     /**

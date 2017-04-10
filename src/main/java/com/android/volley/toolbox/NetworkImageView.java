@@ -16,6 +16,14 @@
 package com.android.volley.toolbox;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup.LayoutParams;
@@ -30,6 +38,16 @@ import com.android.volley.toolbox.ImageLoader.ImageListener;
  * associated request.
  */
 public class NetworkImageView extends ImageView {
+
+    public static final String CIRCLE = "circle";
+    public static final String CIRCLEWITHSTROK = "circle_withpadding";
+    public static int DEFAULT_STROKE_COLOR = Color.GRAY;
+    public static int DEFAULT_STROKE_WIDTH = 5;
+
+    private int strokeColor = DEFAULT_STROKE_COLOR;
+    private int strokeWidth = DEFAULT_STROKE_WIDTH;
+
+
     /** The URL of the network image to load */
     private String mUrl;
 
@@ -49,6 +67,9 @@ public class NetworkImageView extends ImageView {
     /** Current ImageContainer. (either in-flight or finished) */
     private ImageContainer mImageContainer;
 
+    private String type;
+    private ImageLoaderCallBack callBack;
+
     public NetworkImageView(Context context) {
         this(context, null);
     }
@@ -59,6 +80,19 @@ public class NetworkImageView extends ImageView {
 
     public NetworkImageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+    }
+
+    public void setType( String type )
+    {
+        this.type = type;
+    }
+
+    public void setStrokeColor( int color ){
+        this.strokeColor = color;
+    }
+
+    public void setStrokeWidth( int width ){
+        this.strokeWidth = width;
     }
 
     /**
@@ -78,6 +112,27 @@ public class NetworkImageView extends ImageView {
         mImageLoader = imageLoader;
         // The URL has potentially changed. See if we need to load it.
         loadImageIfNecessary(false);
+    }
+
+    /**
+     *
+     * Set the URL as well as adding a callback to set the Bitmap in onResponse()
+     * why?Because the setBitmap() method will trigger the onLayout() and therefore fire the loadImageIfNecessary(), then default bitmap will be
+     * set since there's no url
+     *
+     * avoiding such situation by setting the url and a callback
+     *
+     * NOTE: If applicable, {@link NetworkImageView#setDefaultImageResId(int)} and
+     * {@link NetworkImageView#setErrorImageResId(int)} should be called prior to calling
+     * this function.
+     *
+     * @param url The URL that should be loaded into this ImageView.
+     * @param imageLoader ImageLoader that will be used to make the request.
+     * @param callback  callback to fire
+     */
+    public void setImageUrl(String url, ImageLoader imageLoader , ImageLoaderCallBack callback) {
+        setImageUrl(url, imageLoader);
+        this.callBack = callback;
     }
 
     /**
@@ -152,7 +207,11 @@ public class NetworkImageView extends ImageView {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         if (mErrorImageId != 0) {
-                            setImageResource(mErrorImageId);
+                            setImageBitmap(BitmapFactory.decodeResource(getResources(), mErrorImageId));
+                        }
+
+                        if(callBack!=null){
+                            callBack.onError();
                         }
                     }
 
@@ -174,8 +233,11 @@ public class NetworkImageView extends ImageView {
 
                         if (response.getBitmap() != null) {
                             setImageBitmap(response.getBitmap());
+                            if(callBack!=null){
+                                callBack.onResponse();
+                            }
                         } else if (mDefaultImageId != 0) {
-                            setImageResource(mDefaultImageId);
+                            setImageBitmap( BitmapFactory.decodeResource( getResources(), mDefaultImageId ) );
                         }
                     }
                 }, maxWidth, maxHeight, scaleType);
@@ -186,10 +248,14 @@ public class NetworkImageView extends ImageView {
 
     private void setDefaultImageOrNull() {
         if(mDefaultImageId != 0) {
-            setImageResource(mDefaultImageId);
+            setImageBitmap(BitmapFactory.decodeResource(getResources(), mDefaultImageId));
         }
         else {
             setImageBitmap(null);
+        }
+
+        if( this.callBack != null ){
+            this.callBack.onLoadDefault();
         }
     }
 
@@ -216,5 +282,90 @@ public class NetworkImageView extends ImageView {
     protected void drawableStateChanged() {
         super.drawableStateChanged();
         invalidate();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if( type == CIRCLEWITHSTROK ){
+            Paint mBorderPaint = new Paint();
+            mBorderPaint.setStyle(Paint.Style.STROKE);
+            mBorderPaint.setAntiAlias(true);
+            mBorderPaint.setColor(Color.GRAY);
+            mBorderPaint.setStrokeWidth(strokeWidth*2);
+            canvas.drawCircle(getWidth()/2, getHeight()/2, (getWidth() / 2)-strokeWidth, mBorderPaint);
+        }
+    }
+
+    @Override
+    public void setImageBitmap( Bitmap bm )
+    {
+        if( bm == null )
+        {
+            super.setImageBitmap( bm );
+            return;
+        }
+
+        if( type != null && (type.equals( CIRCLE ) || type.equals(CIRCLEWITHSTROK) )  )
+        {
+            bm = setSquare( bm );
+            bm = getCircleBitmap( bm );
+        }
+        super.setImageBitmap(bm);
+    }
+
+    public Bitmap getCircleBitmap( Bitmap bitmapimg )
+    {
+        Bitmap output = Bitmap.createBitmap(bitmapimg.getWidth(),
+                bitmapimg.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final int color = 0xff424242;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmapimg.getWidth(),
+                bitmapimg.getHeight());
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawCircle(bitmapimg.getWidth() / 2,
+                bitmapimg.getHeight() / 2, bitmapimg.getWidth() / 2, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmapimg, rect, rect, paint);
+        return output;
+    }
+
+
+    public Bitmap setSquare(Bitmap srcBmp )
+    {
+        Bitmap dstBmp;
+        if (srcBmp.getWidth() >= srcBmp.getHeight()){
+
+            dstBmp = Bitmap.createBitmap(
+                    srcBmp,
+                    srcBmp.getWidth()/2 - srcBmp.getHeight()/2,
+                    0,
+                    srcBmp.getHeight(),
+                    srcBmp.getHeight()
+            );
+
+        }else{
+
+            dstBmp = Bitmap.createBitmap(
+                    srcBmp,
+                    0,
+                    srcBmp.getHeight()/2 - srcBmp.getWidth()/2,
+                    srcBmp.getWidth(),
+                    srcBmp.getWidth()
+            );
+        }
+        return dstBmp;
+    }
+
+
+    public  interface ImageLoaderCallBack{
+        void onResponse();
+        void onError();
+        void onLoadDefault();
     }
 }
