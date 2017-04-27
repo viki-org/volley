@@ -21,6 +21,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.http.AndroidHttpClient;
 import android.os.Build;
+import android.telephony.TelephonyManager;
 
 import com.android.volley.Network;
 import com.android.volley.RequestQueue;
@@ -55,7 +56,8 @@ public class Volley {
 
         if (stack == null) {
             if (Build.VERSION.SDK_INT >= 9) {
-                stack = new HurlStack(versionName, ConnectionUtils.getConnectionType(context));
+                TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
+                stack = new HurlStack(versionName, ConnectionUtils.getConnectionType(context), telephonyManager.getNetworkOperatorName());
             } else {
                 // Prior to Gingerbread, HttpUrlConnection was unreliable.
                 // See: http://android-developers.blogspot.com/2011/09/androids-http-clients.html
