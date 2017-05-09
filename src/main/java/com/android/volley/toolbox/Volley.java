@@ -43,30 +43,7 @@ public class Volley {
      */
     public static RequestQueue newRequestQueue(Context context, HttpStack stack) {
         File cacheDir = new File(context.getCacheDir(), DEFAULT_CACHE_DIR);
-
-        String userAgent = "volley/0";
-        String versionName = "";
-        try {
-            String packageName = context.getPackageName();
-            PackageInfo info = context.getPackageManager().getPackageInfo(packageName, 0);
-            userAgent = packageName + "/" + info.versionCode;
-            versionName = info.versionName;
-        } catch (NameNotFoundException e) {
-        }
-
-        if (stack == null) {
-            if (Build.VERSION.SDK_INT >= 9) {
-                TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
-                stack = new HurlStack(versionName, ConnectionUtils.getConnectionType(context), telephonyManager.getNetworkOperatorName());
-            } else {
-                // Prior to Gingerbread, HttpUrlConnection was unreliable.
-                // See: http://android-developers.blogspot.com/2011/09/androids-http-clients.html
-                stack = new HttpClientStack(AndroidHttpClient.newInstance(userAgent));
-            }
-        }
-
         Network network = new BasicNetwork(stack);
-
         RequestQueue queue = new RequestQueue(new DiskBasedCache(cacheDir), network);
         queue.start();
 
@@ -80,7 +57,31 @@ public class Volley {
      * @return A started {@link RequestQueue} instance.
      */
     public static RequestQueue newRequestQueue(Context context) {
-        return newRequestQueue(context, null);
+        return newRequestQueue(context, false);
+    }
+
+    public static RequestQueue newRequestQueue(Context context, boolean isTest) {
+        HttpStack stack;
+
+        String userAgent = "volley/0";
+        String versionName = "";
+        try {
+            String packageName = context.getPackageName();
+            PackageInfo info = context.getPackageManager().getPackageInfo(packageName, 0);
+            userAgent = packageName + "/" + info.versionCode;
+            versionName = info.versionName;
+        } catch (NameNotFoundException e) {
+        }
+
+        if (Build.VERSION.SDK_INT >= 9) {
+            TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
+            stack = new HurlStack(versionName, ConnectionUtils.getConnectionType(context), telephonyManager.getNetworkOperatorName(), isTest);
+        } else {
+            // Prior to Gingerbread, HttpUrlConnection was unreliable.
+            // See: http://android-developers.blogspot.com/2011/09/androids-http-clients.html
+            stack = new HttpClientStack(AndroidHttpClient.newInstance(userAgent));
+        }
+        return newRequestQueue(context, stack);
     }
 
     public static void clearCache(RequestQueue requestQueue) {

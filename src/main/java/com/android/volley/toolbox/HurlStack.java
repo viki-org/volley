@@ -70,13 +70,15 @@ public class HurlStack implements HttpStack {
     private final UrlRewriter mUrlRewriter;
     private final SSLSocketFactory mSslSocketFactory;
     private String appVersion, connectionType, carrierName;
+    private boolean sendTestHeader;
 
-    public HurlStack(String appVersion, String connectionType, String carrierName) {
+    public HurlStack(String appVersion, String connectionType, String carrierName, boolean sendTestHeader) {
         this(null);
 
         this.appVersion = appVersion;
         this.connectionType = connectionType;
         this.carrierName = carrierName;
+        this.sendTestHeader = sendTestHeader;
     }
 
     /**
@@ -103,6 +105,8 @@ public class HurlStack implements HttpStack {
         additionalHeaders.put("X-Viki-device-os-ver", Build.VERSION.RELEASE);
         additionalHeaders.put("X-Viki-connection-type", connectionType);
         additionalHeaders.put("X-Viki-carrier", carrierName);
+        if(sendTestHeader)
+            additionalHeaders.put("X-Viki-test", String.valueOf(sendTestHeader));
         return additionalHeaders;
     }
 
