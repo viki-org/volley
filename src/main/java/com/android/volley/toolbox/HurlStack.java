@@ -97,7 +97,7 @@ public class HurlStack implements HttpStack {
         mSslSocketFactory = sslSocketFactory;
     }
 
-    private Map<String,String> getVikiHeaders() {
+    private Map<String,String> getVikiHeaders(int retryCount) {
         Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("X-Viki-app-ver", appVersion);
         additionalHeaders.put("X-Viki-manufacturer", Build.MANUFACTURER);
@@ -105,6 +105,7 @@ public class HurlStack implements HttpStack {
         additionalHeaders.put("X-Viki-device-os-ver", Build.VERSION.RELEASE);
         additionalHeaders.put("X-Viki-connection-type", connectionType);
         additionalHeaders.put("X-Viki-carrier", carrierName);
+        additionalHeaders.put("X-Viki-retries", Integer.toString(retryCount));
         if(sendTestHeader)
             additionalHeaders.put("X-Viki-test", String.valueOf(sendTestHeader));
         return additionalHeaders;
@@ -117,7 +118,7 @@ public class HurlStack implements HttpStack {
         HashMap<String, String> map = new HashMap<String, String>();
         map.putAll(request.getHeaders());
         map.putAll(additionalHeaders);
-        map.putAll(getVikiHeaders());
+        map.putAll(getVikiHeaders(request.getRetryPolicy().getCurrentRetryCount()));
         if (mUrlRewriter != null) {
             String rewritten = mUrlRewriter.rewriteUrl(url);
             if (rewritten == null) {
