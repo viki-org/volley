@@ -44,6 +44,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -55,6 +57,9 @@ public class HurlStack implements HttpStack {
 
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String UTF8_CHARSET = "UTF-8";
+
+    final static String IMAGE_VIKI_REGEX = "\\d+\\.viki\\.io";
+    final Pattern pattern = Pattern.compile(IMAGE_VIKI_REGEX);
 
     /**
      * An interface for transforming URLs before use.
@@ -127,6 +132,20 @@ public class HurlStack implements HttpStack {
             url = rewritten;
         }
         URL parsedUrl = new URL(url);
+
+        final Matcher matcher = pattern.matcher(url);
+        if(matcher.find()) {
+            StringBuilder acceptHeaderStringBuilder = new StringBuilder();
+            if (Build.VERSION.SDK_INT >= 18) {
+                acceptHeaderStringBuilder.append("image/webp;");
+            }
+
+            acceptHeaderStringBuilder.append("image/jpg;");
+            acceptHeaderStringBuilder.append("image/png");
+
+            map.put("Accept", acceptHeaderStringBuilder.toString());
+        }
+
         HttpURLConnection connection = openConnection(parsedUrl, request);
         for (String headerName : map.keySet()) {
             connection.addRequestProperty(headerName, map.get(headerName));
