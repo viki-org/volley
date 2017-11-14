@@ -75,11 +75,12 @@ public class VikiStringRequest extends StringRequest {
 
     @Override
     public String getCacheKey() {
-        String cacheKey = getUrl();
+        StringBuilder cacheKeyBuilder = new StringBuilder(getUrl());
         for (Map.Entry<String, String> entry: mParams.entrySet()){
-            cacheKey += entry.getKey() + entry.getValue();
+            cacheKeyBuilder.append(entry.getKey());
+            cacheKeyBuilder.append(entry.getValue());
         }
-        return cacheKey;
+        return cacheKeyBuilder.toString();
     }
 
     public static final class Builder {
