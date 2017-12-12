@@ -15,6 +15,9 @@ public class ConnectionUtils {
     {
         ConnectivityManager mConnectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         // Skip if no connection, or background data disabled
+        if(mConnectivity == null)
+            return "UNKNOWN";
+
         NetworkInfo info = mConnectivity.getActiveNetworkInfo();
         if (info != null )
         {
@@ -65,8 +68,9 @@ public class ConnectionUtils {
                         return "LTE"; // ~ 10+ Mbps
                     // Unknown
                     case TelephonyManager.NETWORK_TYPE_UNKNOWN:
-                    default:
                         return "UNKNOWN";
+                    default:
+                        return netSubtype + "";
                 }
             }
         }
