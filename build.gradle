@@ -11,3 +11,9 @@ android {
 
 apply from: 'rules.gradle'
 apply from: 'bintray.gradle'
+
+
+dependencies{
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+
+}

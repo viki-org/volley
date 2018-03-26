@@ -70,7 +70,7 @@ public class Volley {
         }
 
         TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
-        network = new BasicNetwork(new HurlStack(versionName, ConnectionUtils.getConnectionType(context), telephonyManager != null ? telephonyManager.getNetworkOperatorName() : null, isTest));
+        network = new BasicNetwork(new OkStack(versionName, ConnectionUtils.getConnectionType(context), telephonyManager != null ? telephonyManager.getNetworkOperatorName() : null, isTest));
         return newRequestQueue(context, network);
     }
 
