@@ -347,4 +347,9 @@ public class HurlStack extends BaseHttpStack {
         out.write(body);
         out.close();
     }
+
+    @Override
+    public void updateConnectionType(String connectionType) {
+        this.connectionType = connectionType;
+    }
 }

@@ -34,6 +34,8 @@ public class Volley {
     /** Default on-disk cache directory. */
     private static final String DEFAULT_CACHE_DIR = "volley";
 
+    private static BaseHttpStack httpStack;
+
     /**
      * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
      *
@@ -56,19 +58,24 @@ public class Volley {
      * @return A started {@link RequestQueue} instance.
      */
     public static RequestQueue newRequestQueue(Context context) {
-        BaseHttpStack httpStack = newOkStack(context, false);
-        return newRequestQueue(context, httpStack);
+        return newRequestQueue(context, false);
     }
 
-    /**
-     * Use this when we want to inject the httpStack
-     */
-    public static RequestQueue newRequestQueue(Context context, BaseHttpStack httpStack) {
+    public static RequestQueue newRequestQueue(Context context, boolean isTest) {
+        if (httpStack == null) {
+            httpStack = newHttpStack(context, isTest);
+        }
         Network network = new BasicNetwork(httpStack);
         return newRequestQueue(context, network);
     }
 
-    public static OkStack newOkStack(Context context, boolean isTest) {
+    public static void updateConnectionType(String connectionType) {
+        if (httpStack != null) {
+            httpStack.updateConnectionType(connectionType);
+        }
+    }
+
+    private static BaseHttpStack newHttpStack(Context context, boolean isTest) {
         String versionName = "";
         try {
             String packageName = context.getPackageName();

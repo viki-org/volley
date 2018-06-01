@@ -51,6 +51,7 @@ public class OkStack extends BaseHttpStack {
         client = new OkHttpClient();
     }
 
+    @Override
     public void updateConnectionType(String connectionType) {
         this.connectionType = connectionType;
     }
