@@ -78,4 +78,9 @@ class AdaptedHttpStack extends BaseHttpStack {
                 (int) apacheResp.getEntity().getContentLength(),
                 apacheResp.getEntity().getContent());
     }
+
+    @Override
+    public void updateConnectionType(String connectionType) {
+        // Not supported for AdaptedHttpStack.
+    }
 }

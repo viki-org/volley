@@ -34,6 +34,8 @@ public class Volley {
     /** Default on-disk cache directory. */
     private static final String DEFAULT_CACHE_DIR = "volley";
 
+    private static BaseHttpStack httpStack;
+
     /**
      * Creates a default instance of the worker pool and calls {@link RequestQueue#start()} on it.
      *
@@ -60,7 +62,20 @@ public class Volley {
     }
 
     public static RequestQueue newRequestQueue(Context context, boolean isTest) {
-        Network network;
+        if (httpStack == null) {
+            httpStack = newHttpStack(context, isTest);
+        }
+        Network network = new BasicNetwork(httpStack);
+        return newRequestQueue(context, network);
+    }
+
+    public static void updateConnectionType(String connectionType) {
+        if (httpStack != null) {
+            httpStack.updateConnectionType(connectionType);
+        }
+    }
+
+    private static BaseHttpStack newHttpStack(Context context, boolean isTest) {
         String versionName = "";
         try {
             String packageName = context.getPackageName();
@@ -69,9 +84,16 @@ public class Volley {
         } catch (NameNotFoundException e) {
         }
 
-        TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
-        network = new BasicNetwork(new OkStack(versionName, ConnectionUtils.getConnectionType(context), telephonyManager != null ? telephonyManager.getNetworkOperatorName() : null, isTest));
-        return newRequestQueue(context, network);
+        TelephonyManager telephonyManager =
+                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+
+        String carrierName = telephonyManager != null
+                ? telephonyManager.getNetworkOperatorName()
+                : null;
+
+        String connectionType = ConnectionUtils.getConnectionType(context);
+
+        return new OkStack(versionName, connectionType, carrierName, isTest);
     }
 
     public static void clearCache(RequestQueue requestQueue) {

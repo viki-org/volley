@@ -51,6 +51,11 @@ public class OkStack extends BaseHttpStack {
         client = new OkHttpClient();
     }
 
+    @Override
+    public void updateConnectionType(String connectionType) {
+        this.connectionType = connectionType;
+    }
+
     private Map<String, String> getVikiHeaders(int retryCount) {
         Map<String, String> additionalHeaders = new HashMap<>();
         additionalHeaders.put("X-Viki-app-ver", appVersion);
@@ -64,7 +69,6 @@ public class OkStack extends BaseHttpStack {
             additionalHeaders.put("X-Viki-test", String.valueOf(sendTestHeader));
         return additionalHeaders;
     }
-
 
     @Override
     public HttpResponse executeRequest(Request<?> request, Map<String, String> additionalHeaders) throws IOException, AuthFailureError {
