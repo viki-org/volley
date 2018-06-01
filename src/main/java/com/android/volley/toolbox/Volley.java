@@ -56,11 +56,19 @@ public class Volley {
      * @return A started {@link RequestQueue} instance.
      */
     public static RequestQueue newRequestQueue(Context context) {
-        return newRequestQueue(context, false);
+        BaseHttpStack httpStack = newOkStack(context, false);
+        return newRequestQueue(context, httpStack);
     }
 
-    public static RequestQueue newRequestQueue(Context context, boolean isTest) {
-        Network network;
+    /**
+     * Use this when we want to inject the httpStack
+     */
+    public static RequestQueue newRequestQueue(Context context, BaseHttpStack httpStack) {
+        Network network = new BasicNetwork(httpStack);
+        return newRequestQueue(context, network);
+    }
+
+    public static OkStack newOkStack(Context context, boolean isTest) {
         String versionName = "";
         try {
             String packageName = context.getPackageName();
@@ -69,9 +77,16 @@ public class Volley {
         } catch (NameNotFoundException e) {
         }
 
-        TelephonyManager telephonyManager = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE));
-        network = new BasicNetwork(new OkStack(versionName, ConnectionUtils.getConnectionType(context), telephonyManager != null ? telephonyManager.getNetworkOperatorName() : null, isTest));
-        return newRequestQueue(context, network);
+        TelephonyManager telephonyManager =
+                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+
+        String carrierName = telephonyManager != null
+                ? telephonyManager.getNetworkOperatorName()
+                : null;
+
+        String connectionType = ConnectionUtils.getConnectionType(context);
+
+        return new OkStack(versionName, connectionType, carrierName, isTest);
     }
 
     public static void clearCache(RequestQueue requestQueue) {
