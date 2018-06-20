@@ -73,6 +73,9 @@ public class ConnectionUtils {
                         return netSubtype + "";
                 }
             }
+            else if( netType == ConnectivityManager.TYPE_ETHERNET ){
+                return "ETHERNET";
+            }
         }
         return null;
     }
