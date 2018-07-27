@@ -77,7 +77,7 @@ public class ConnectionUtils {
                 return "ETHERNET";
             }
         }
-        return null;
+        return "UNKNOWN";
     }
 
     public static boolean hasNetWorkConnection(Context context) {
