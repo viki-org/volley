@@ -96,4 +96,14 @@ public class ConnectionUtils {
         NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         return mWifi != null && mWifi.isConnected();
     }
+
+    public static boolean isNetworkMetered(Context context) {
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connManager == null)
+            return false;
+        // For TV, its possible to use Ethernet. Therefore, one of judgements whether play HD should rely on user need to pay for connection.
+        // That's why we use network metered to judge. If this method return false, it means data has no limitations.
+        // A network is classified as metered when the user is sensitive to heavy data usage on that connection due to monetary costs, data limitations or battery/performance issues.
+        return !connManager.isActiveNetworkMetered();
+    }
 }
