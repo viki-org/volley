@@ -97,6 +97,14 @@ public class ConnectionUtils {
         return mWifi != null && mWifi.isConnected();
     }
 
+    public static boolean isInEthernetMode(Context context) {
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connManager == null)
+            return false;
+        NetworkInfo mEtherent = connManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
+        return mEtherent != null && mEtherent.isConnected();
+    }
+
     public static boolean isNetworkMetered(Context context) {
         ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connManager == null)
