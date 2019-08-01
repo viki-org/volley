@@ -90,6 +90,14 @@ public class VikiStringRequest extends StringRequest {
         private Response.ErrorListener errorListener;
         private Map<String, String> params, headers;
 
+        /**
+         * Session ID is ignored.
+         */
+        @Deprecated
+        public Builder(int method, String url, String sessionId, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+            this(method, url, listener, errorListener);
+        }
+
         public Builder(int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
             this.method = method;
             this.url = url;
