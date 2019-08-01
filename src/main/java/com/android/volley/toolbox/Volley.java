@@ -29,6 +29,8 @@ import com.android.volley.utils.ConnectionUtils;
 
 import java.io.File;
 
+import okhttp3.OkHttpClient;
+
 public class Volley {
 
     /** Default on-disk cache directory. */
@@ -58,12 +60,12 @@ public class Volley {
      * @return A started {@link RequestQueue} instance.
      */
     public static RequestQueue newRequestQueue(Context context) {
-        return newRequestQueue(context, false);
+        return newRequestQueue(context, false, new OkHttpClient());
     }
 
-    public static RequestQueue newRequestQueue(Context context, boolean isTest) {
+    public static RequestQueue newRequestQueue(Context context, boolean isTest, OkHttpClient okHttpClient) {
         if (httpStack == null) {
-            httpStack = newHttpStack(context, isTest);
+            httpStack = newHttpStack(context, isTest, okHttpClient);
         }
         Network network = new BasicNetwork(httpStack);
         return newRequestQueue(context, network);
@@ -75,7 +77,7 @@ public class Volley {
         }
     }
 
-    private static BaseHttpStack newHttpStack(Context context, boolean isTest) {
+    private static BaseHttpStack newHttpStack(Context context, boolean isTest, OkHttpClient okHttpClient) {
         String versionName = "";
         try {
             String packageName = context.getPackageName();
@@ -93,7 +95,7 @@ public class Volley {
 
         String connectionType = ConnectionUtils.getConnectionType(context);
 
-        return new OkStack(versionName, connectionType, carrierName, isTest);
+        return new OkStack(versionName, connectionType, carrierName, isTest, okHttpClient);
     }
 
     public static void clearCache(RequestQueue requestQueue) {

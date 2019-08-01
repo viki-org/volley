@@ -43,12 +43,12 @@ public class OkStack extends BaseHttpStack {
     final Pattern pattern = Pattern.compile(IMAGE_VIKI_REGEX);
 
 
-    public OkStack(String appVersion, String connectionType, String carrierName, boolean sendTestHeader) {
+    public OkStack(String appVersion, String connectionType, String carrierName, boolean sendTestHeader, OkHttpClient client) {
         this.appVersion = appVersion;
         this.connectionType = connectionType;
         this.carrierName = carrierName;
         this.sendTestHeader = sendTestHeader;
-        client = new OkHttpClient();
+        this.client = client;
     }
 
     @Override
