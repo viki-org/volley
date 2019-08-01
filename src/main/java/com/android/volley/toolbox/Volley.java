@@ -60,12 +60,12 @@ public class Volley {
      * @return A started {@link RequestQueue} instance.
      */
     public static RequestQueue newRequestQueue(Context context) {
-        return newRequestQueue(context, false, new OkHttpClient());
+        return newRequestQueue(context, new OkHttpClient());
     }
 
-    public static RequestQueue newRequestQueue(Context context, boolean isTest, OkHttpClient okHttpClient) {
+    public static RequestQueue newRequestQueue(Context context, OkHttpClient okHttpClient) {
         if (httpStack == null) {
-            httpStack = newHttpStack(context, isTest, okHttpClient);
+            httpStack = newHttpStack(context, okHttpClient);
         }
         Network network = new BasicNetwork(httpStack);
         return newRequestQueue(context, network);
@@ -77,7 +77,7 @@ public class Volley {
         }
     }
 
-    private static BaseHttpStack newHttpStack(Context context, boolean isTest, OkHttpClient okHttpClient) {
+    private static BaseHttpStack newHttpStack(Context context, OkHttpClient okHttpClient) {
         String versionName = "";
         try {
             String packageName = context.getPackageName();
@@ -95,7 +95,7 @@ public class Volley {
 
         String connectionType = ConnectionUtils.getConnectionType(context);
 
-        return new OkStack(versionName, connectionType, carrierName, isTest, okHttpClient);
+        return new OkStack(versionName, connectionType, carrierName, okHttpClient);
     }
 
     public static void clearCache(RequestQueue requestQueue) {

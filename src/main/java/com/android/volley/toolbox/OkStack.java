@@ -37,17 +37,15 @@ public class OkStack extends BaseHttpStack {
 
 
     private String appVersion, connectionType, carrierName;
-    private boolean sendTestHeader;
     private OkHttpClient client;
     final static String IMAGE_VIKI_REGEX = "\\d+\\.viki\\.io";
     final Pattern pattern = Pattern.compile(IMAGE_VIKI_REGEX);
 
 
-    public OkStack(String appVersion, String connectionType, String carrierName, boolean sendTestHeader, OkHttpClient client) {
+    public OkStack(String appVersion, String connectionType, String carrierName, OkHttpClient client) {
         this.appVersion = appVersion;
         this.connectionType = connectionType;
         this.carrierName = carrierName;
-        this.sendTestHeader = sendTestHeader;
         this.client = client;
     }
 
@@ -65,8 +63,6 @@ public class OkStack extends BaseHttpStack {
         additionalHeaders.put("X-Viki-connection-type", connectionType);
         additionalHeaders.put("X-Viki-carrier", carrierName);
         additionalHeaders.put("X-Viki-retries", Integer.toString(retryCount));
-        if (sendTestHeader)
-            additionalHeaders.put("X-Viki-test", String.valueOf(sendTestHeader));
         return additionalHeaders;
     }
 
