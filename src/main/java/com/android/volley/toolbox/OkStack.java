@@ -1,6 +1,5 @@
 package com.android.volley.toolbox;
 
-import android.os.Build;
 import android.text.TextUtils;
 
 import com.android.volley.AuthFailureError;
@@ -15,8 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -32,38 +29,12 @@ import static okhttp3.internal.http.StatusLine.HTTP_CONTINUE;
 
 public class OkStack extends BaseHttpStack {
 
-
     private static final String UTF8_CHARSET = "UTF-8";
 
-
-    private String appVersion, connectionType, carrierName;
     private OkHttpClient client;
-    final static String IMAGE_VIKI_REGEX = "\\d+\\.viki\\.io";
-    final Pattern pattern = Pattern.compile(IMAGE_VIKI_REGEX);
 
-
-    public OkStack(String appVersion, String connectionType, String carrierName, OkHttpClient client) {
-        this.appVersion = appVersion;
-        this.connectionType = connectionType;
-        this.carrierName = carrierName;
+    public OkStack(OkHttpClient client) {
         this.client = client;
-    }
-
-    @Override
-    public void updateConnectionType(String connectionType) {
-        this.connectionType = connectionType;
-    }
-
-    private Map<String, String> getVikiHeaders(int retryCount) {
-        Map<String, String> additionalHeaders = new HashMap<>();
-        additionalHeaders.put("X-Viki-app-ver", appVersion);
-        additionalHeaders.put("X-Viki-manufacturer", Build.MANUFACTURER);
-        additionalHeaders.put("X-Viki-device-model", Build.MODEL);
-        additionalHeaders.put("X-Viki-device-os-ver", Build.VERSION.RELEASE);
-        additionalHeaders.put("X-Viki-connection-type", connectionType);
-        additionalHeaders.put("X-Viki-carrier", carrierName);
-        additionalHeaders.put("X-Viki-retries", Integer.toString(retryCount));
-        return additionalHeaders;
     }
 
     @Override
@@ -72,23 +43,9 @@ public class OkStack extends BaseHttpStack {
         HashMap<String, String> map = new HashMap<>();
         map.putAll(request.getHeaders());
         map.putAll(additionalHeaders);
-        map.putAll(getVikiHeaders(request.getRetryPolicy().getCurrentRetryCount()));
+        map.put("X-Viki-retries", Integer.toString(request.getRetryPolicy().getCurrentRetryCount()));
 
         URL parsedUrl = new URL(url);
-
-        final Matcher matcher = pattern.matcher(url);
-        if (matcher.find()) {
-            StringBuilder acceptHeaderStringBuilder = new StringBuilder();
-            if (Build.VERSION.SDK_INT >= 18) {
-                acceptHeaderStringBuilder.append("image/webp;");
-            }
-
-            acceptHeaderStringBuilder.append("image/jpg;");
-            acceptHeaderStringBuilder.append("image/png");
-
-            map.put("Accept", acceptHeaderStringBuilder.toString());
-        }
-
         okhttp3.Request.Builder okRequestBuilder = new okhttp3.Request.Builder()
                 .url(parsedUrl);
         //add headers

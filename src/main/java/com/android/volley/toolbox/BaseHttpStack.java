@@ -90,9 +90,4 @@ public abstract class BaseHttpStack implements HttpStack {
 
         return apacheResponse;
     }
-
-    /**
-     * This allows us to notify the stack of any network connectivity changes.
-     */
-    public abstract void updateConnectionType(String connectionType);
 }

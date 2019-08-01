@@ -41,16 +41,15 @@ public class VikiJsonObjectRequest extends JsonObjectRequest {
 
     public static final class Builder {
         private int method;
-        private String url, sessionId;
+        private String url;
         JSONObject jsonRequest;
         private Response.Listener<JSONObject> listener;
         private Response.ErrorListener errorListener;
         private Map<String, String> params, headers;
 
-        public Builder(int method, String url, String sessionId, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        public Builder(int method, String url, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
             this.method = method;
             this.url = url;
-            this.sessionId = sessionId;
             this.listener = listener;
             this.errorListener = errorListener;
             this.params = new HashMap<>();
@@ -77,7 +76,6 @@ public class VikiJsonObjectRequest extends JsonObjectRequest {
         }
 
         public VikiJsonObjectRequest build() {
-            headers.put("X-Viki-as-id", sessionId);
             return new VikiJsonObjectRequest(this);
         }
     }

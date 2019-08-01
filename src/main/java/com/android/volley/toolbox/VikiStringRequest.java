@@ -85,15 +85,14 @@ public class VikiStringRequest extends StringRequest {
 
     public static final class Builder {
         private int method;
-        private String url, sessionId, requestBody;
+        private String url, requestBody;
         private Response.Listener<String> listener;
         private Response.ErrorListener errorListener;
         private Map<String, String> params, headers;
 
-        public Builder(int method, String url, String sessionId, Response.Listener<String> listener, Response.ErrorListener errorListener) {
+        public Builder(int method, String url, Response.Listener<String> listener, Response.ErrorListener errorListener) {
             this.method = method;
             this.url = url;
-            this.sessionId = sessionId;
             this.listener = listener;
             this.errorListener = errorListener;
             this.params = new HashMap<>();
@@ -120,7 +119,6 @@ public class VikiStringRequest extends StringRequest {
         }
 
         public VikiStringRequest build() {
-            headers.put("X-Viki-as-id", sessionId);
             return new VikiStringRequest(this);
         }
     }

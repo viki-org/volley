@@ -65,37 +65,14 @@ public class Volley {
 
     public static RequestQueue newRequestQueue(Context context, OkHttpClient okHttpClient) {
         if (httpStack == null) {
-            httpStack = newHttpStack(context, okHttpClient);
+            httpStack = newHttpStack(okHttpClient);
         }
         Network network = new BasicNetwork(httpStack);
         return newRequestQueue(context, network);
     }
 
-    public static void updateConnectionType(String connectionType) {
-        if (httpStack != null) {
-            httpStack.updateConnectionType(connectionType);
-        }
-    }
-
-    private static BaseHttpStack newHttpStack(Context context, OkHttpClient okHttpClient) {
-        String versionName = "";
-        try {
-            String packageName = context.getPackageName();
-            PackageInfo info = context.getPackageManager().getPackageInfo(packageName, 0);
-            versionName = info.versionName;
-        } catch (NameNotFoundException e) {
-        }
-
-        TelephonyManager telephonyManager =
-                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-
-        String carrierName = telephonyManager != null
-                ? telephonyManager.getNetworkOperatorName()
-                : null;
-
-        String connectionType = ConnectionUtils.getConnectionType(context);
-
-        return new OkStack(versionName, connectionType, carrierName, okHttpClient);
+    private static BaseHttpStack newHttpStack(OkHttpClient okHttpClient) {
+        return new OkStack(okHttpClient);
     }
 
     public static void clearCache(RequestQueue requestQueue) {
