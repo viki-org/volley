@@ -52,7 +52,7 @@ public class OkStack extends BaseHttpStack {
         for (String headerName : map.keySet()) {
             okRequestBuilder.addHeader(headerName, map.get(headerName));
         }
-
+        okRequestBuilder.tag(request.getTag());
         setConnectionParametersForRequest(okRequestBuilder, request);
 
 

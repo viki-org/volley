@@ -22,19 +22,22 @@ public class VikiStringRequest extends StringRequest {
     private Map<String, String> mHeaders = new HashMap<>();
     private Map<String, String> mParams = new HashMap<>();
     private String mRequestBody;
+    private Object mTag;
 
     private VikiStringRequest(int method, String url,
                               Map<String, String> headers, Map<String, String> params, String requestBody,
-                              Response.Listener<String> listener, Response.ErrorListener errorListener) {
+                              Response.Listener<String> listener, Response.ErrorListener errorListener,
+                              Object tag) {
         super(method, url, listener, errorListener);
 
         mHeaders = headers;
         mParams = params;
         mRequestBody = (requestBody == null) ? null : requestBody;
+        mTag = tag;
     }
 
     private VikiStringRequest(Builder builder) {
-        this(builder.method, builder.url, builder.headers, builder.params, builder.requestBody, builder.listener, builder.errorListener);
+        this(builder.method, builder.url, builder.headers, builder.params, builder.requestBody, builder.listener, builder.errorListener, builder.tag);
     }
 
     @Override
@@ -89,6 +92,7 @@ public class VikiStringRequest extends StringRequest {
         private Response.Listener<String> listener;
         private Response.ErrorListener errorListener;
         private Map<String, String> params, headers;
+        private Object tag;
 
         /**
          * Session ID is ignored.
@@ -123,6 +127,11 @@ public class VikiStringRequest extends StringRequest {
 
         public Builder withParams(Map<String, String> val) {
             params = val;
+            return this;
+        }
+
+        public Builder withTag(Object tag) {
+            this.tag = tag;
             return this;
         }
 
