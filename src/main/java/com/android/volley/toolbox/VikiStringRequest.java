@@ -1,7 +1,5 @@
 package com.android.volley.toolbox;
 
-import android.os.Build;
-
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
 
