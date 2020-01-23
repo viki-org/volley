@@ -21,8 +21,6 @@ package com.android.volley;
  */
 @SuppressWarnings("serial")
 public class VolleyError extends Exception {
-
-    public int errorCode = 0;
     private final NetworkResponse networkResponse;
     private long networkTimeMs;
 
@@ -68,10 +66,5 @@ public class VolleyError extends Exception {
             return new String( networkResponse.data );
         }
         return super.getMessage();
-    }
-
-    public VolleyError(int errorCode){
-        this.errorCode = errorCode;
-        networkResponse = null;
     }
 }
