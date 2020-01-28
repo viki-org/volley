@@ -19,10 +19,9 @@ public class VikiStringRequest extends StringRequest {
     /** Content type for request. */
     private static final String PROTOCOL_CONTENT_TYPE = String.format("application/json; charset=%s", PROTOCOL_CHARSET);
 
-    private Map<String, String> mHeaders = new HashMap<>();
-    private Map<String, String> mParams = new HashMap<>();
+    private Map<String, String> mHeaders;
+    private Map<String, String> mParams;
     private String mRequestBody;
-    private Object mTag;
 
     private VikiStringRequest(int method, String url,
                               Map<String, String> headers, Map<String, String> params, String requestBody,
@@ -32,8 +31,8 @@ public class VikiStringRequest extends StringRequest {
 
         mHeaders = headers;
         mParams = params;
-        mRequestBody = (requestBody == null) ? null : requestBody;
-        mTag = tag;
+        mRequestBody = requestBody;
+        setTag(tag);
     }
 
     private VikiStringRequest(Builder builder) {
