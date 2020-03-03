@@ -13,7 +13,6 @@ android {
 }
 
 apply from: 'rules.gradle'
-apply from: 'bintray.gradle'
 
 
 dependencies{
