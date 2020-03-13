@@ -103,6 +103,12 @@ public class HurlStack extends BaseHttpStack {
         additionalHeaders.put("X-Viki-connection-type", connectionType);
         additionalHeaders.put("X-Viki-carrier", carrierName);
         additionalHeaders.put("X-Viki-retries", Integer.toString(retryCount));
+
+        additionalHeaders.put("X-Viki-device-hardware", Build.HARDWARE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            additionalHeaders.put("X-Viki-device-security-patch", Build.VERSION.SECURITY_PATCH);
+        }
+
         if(sendTestHeader)
             additionalHeaders.put("X-Viki-test", String.valueOf(sendTestHeader));
         return additionalHeaders;
