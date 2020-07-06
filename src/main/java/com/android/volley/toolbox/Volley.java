@@ -17,15 +17,9 @@
 package com.android.volley.toolbox;
 
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.net.http.AndroidHttpClient;
-import android.os.Build;
-import android.telephony.TelephonyManager;
 
 import com.android.volley.Network;
 import com.android.volley.RequestQueue;
-import com.android.volley.utils.ConnectionUtils;
 
 import java.io.File;
 
